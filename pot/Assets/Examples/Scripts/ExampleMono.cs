@@ -8,8 +8,8 @@ namespace Examples {
         [Bind]
         private Rigidbody2D _rigidbody;
 
-        [Bind]
-        private Collider2D _collider;
+        [Bind(failover: true, resolver: "InitRigidBodyDefault")]
+        private BoxCollider2D _collider;
 
         private void Awake() {
             P.Bind(this);
@@ -24,6 +24,10 @@ namespace Examples {
             Debug.Log(o != null
                 ? "\"" + type + "\" initialized"
                 : "\"" + type + "\" didn't initialized");
+        }
+
+        private void InitBoxCollider2DDefault(BoxCollider2D box) {
+            Debug.Log("Setting Default BoxCollider2D");
         }
     }
 }

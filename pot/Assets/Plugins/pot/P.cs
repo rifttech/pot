@@ -7,6 +7,7 @@ using UnityEngine;
 // ReSharper disable once CheckNamespace
 namespace Pot {
     public static class P {
+        private static readonly string Tag = "pot";
         public static void Bind<T>(T mono) where T : MonoBehaviour {
             ResolveBindings(mono);
         }
@@ -42,6 +43,17 @@ namespace Pot {
             if (component != null) {
                 field.SetValue(mono, component);
             }
+            else {
+                if (!IsFailover(field).Equals(Failover, StringComparison.Ordinal)) return;
+
+                
+                var newComponent = mono.gameObject.AddComponent(field.FieldType);
+                field.SetValue(mono, newComponent);
+
+                Debug.LogWarningFormat(
+                    "[{0}] Failover: Add Component \"{1}\" to GameObject \"{2}\"", 
+                    Tag, newComponent.GetType(), mono.gameObject.name);
+            }
         }
 
         private static string IsFailover(FieldInfo fieldInfo) {
@@ -66,6 +78,16 @@ namespace Pot {
             return o == null ? null : f(o);
         }
 
-        
+        public static void Result<T>(this T o, Action<T> s, Action f)
+            where T : class {
+            if (o != null) {
+                s(o);
+            }
+            else {
+                f();
+            }
+        }
+
+
     }
 }
